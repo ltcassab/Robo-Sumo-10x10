@@ -21,6 +21,7 @@ Sistemas Embarcados · Universidade do Vale do Paraíba
 ## 📑 Sumário
 
 - [Sobre o projeto](#-sobre-o-projeto)
+- [Vídeo](#-vídeo)
 - [Diagrama elétrico](#-diagrama-elétrico)
 - [Componentes](#-componentes)
 - [Alimentação](#-alimentação)
@@ -42,6 +43,16 @@ Robô de 10 cm × 10 cm construído para uma prova de competição: encontrar e 
 |:---:|---|
 | 📡 **HC-SR04** (ultrassom, frente) | Procura o alvo e decide quando atacar |
 | 👁️ **TCRT5000** (infravermelho, chão) | Detecta qualquer cor que não seja preta → borda da arena |
+
+---
+
+## 🎥 Vídeo
+
+| Vídeo | Duração | Link |
+|---|---|---|
+| 🔧 **Explicação do hardware** | 4 min 23 s | ▶️ [Assistir / baixar (1080×1920)](https://github.com/ltcassab/Robo-Sumo-10x10/releases/download/v1.0/Video-Hardware.mp4) |
+
+> Os vídeos ficam na [Release v1.0](https://github.com/ltcassab/Robo-Sumo-10x10/releases/tag/v1.0) para manter a qualidade original sem pesar o repositório.
 
 ---
 
