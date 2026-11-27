@@ -23,26 +23,27 @@ Sistemas Embarcados · Universidade do Vale do Paraíba
 - [Sobre o projeto](#-sobre-o-projeto)
 - [Vídeo](#-vídeo)
 - [Diagrama elétrico](#-diagrama-elétrico)
-- [Componentes](#-componentes)
+- [Componentes utilizados](#-componentes-utilizados)
 - [Alimentação](#-alimentação)
-- [Ligações do ESP32](#-ligações-do-esp32)
-- [Cores dos fios](#-cores-dos-fios)
+- [Pinagem do ESP32](#-pinagem-do-esp32)
+- [Montagem](#-montagem)
 - [Firmware](#-firmware)
-- [Calibração do infravermelho](#-calibração-do-infravermelho)
-- [Simulação no Wokwi](#-simulação-no-wokwi)
-- [Segurança](#%EF%B8%8F-segurança)
+- [Decisões de projeto](#-decisões-de-projeto)
+- [Validação e testes](#-validação-e-testes)
 - [Estrutura do repositório](#-estrutura-do-repositório)
 
 ---
 
 ## 🎯 Sobre o projeto
 
-Robô de 10 cm × 10 cm construído para uma prova de competição: encontrar e **derrubar uma garrafa** dentro de uma arena **totalmente preta** (~65–70 cm) **sem sair dela** — sair da arena é derrota.
+Robô de 10 cm × 10 cm desenvolvido para uma prova de competição: encontrar e **derrubar uma garrafa** dentro de uma arena **totalmente preta** (~65–70 cm) **sem sair dela** — sair da arena significa derrota.
 
-| Sensor | Papel |
+O projeto passou por todas as etapas de um sistema embarcado: desenho do circuito no KiCad, montagem em placa de fenolite, simulação do comportamento no Wokwi, desenvolvimento do firmware em ESP-IDF e teste no robô real.
+
+| Sensor | Papel no robô |
 |:---:|---|
 | 📡 **HC-SR04** (ultrassom, frente) | Procura o alvo e decide quando atacar |
-| 👁️ **TCRT5000** (infravermelho, chão) | Detecta qualquer cor que não seja preta → borda da arena |
+| 👁️ **TCRT5000** (infravermelho, voltado para o chão) | Detecta qualquer cor que não seja preta → borda da arena |
 
 ---
 
@@ -52,13 +53,13 @@ Robô de 10 cm × 10 cm construído para uma prova de competição: encontrar e 
 |---|---|---|
 | 🔧 **Explicação do hardware** | 4 min 23 s | ▶️ [Assistir / baixar (1080×1920)](https://github.com/ltcassab/Robo-Sumo-10x10/releases/download/v1.0/Video-Hardware.mp4) |
 
-> Os vídeos ficam na [Release v1.0](https://github.com/ltcassab/Robo-Sumo-10x10/releases/tag/v1.0) para manter a qualidade original sem pesar o repositório.
+> Os vídeos estão na [Release v1.0](https://github.com/ltcassab/Robo-Sumo-10x10/releases/tag/v1.0), na qualidade original.
 
 ---
 
 ## 🔌 Diagrama elétrico
 
-Feito no **KiCad** (revisão **R2**). Os pinos do ESP32 mostram os dois nomes: o do esquemático (`Dxx`) e o impresso na placa usada (`Gxx`).
+O circuito foi desenhado no **KiCad** (revisão **R2**). Os pinos do ESP32 aparecem com os dois nomes: o padrão do esquemático (`Dxx`) e o impresso na placa utilizada (`Gxx`).
 
 <p align="center">
   <a href="Diagrama-Eletrico.pdf"><img src="docs/diagrama-eletrico.svg" alt="Diagrama elétrico do Robô Sumô 10x10" width="100%"></a>
@@ -72,11 +73,11 @@ Feito no **KiCad** (revisão **R2**). Os pinos do ESP32 mostram os dois nomes: o
 </p>
 </details>
 
-📄 **[Baixar o diagrama em PDF](Diagrama-Eletrico.pdf)** · 🛠️ [Projeto KiCad](hardware/kicad)
+📄 **[Diagrama em PDF](Diagrama-Eletrico.pdf)** · 🛠️ [Projeto KiCad](hardware/kicad)
 
 ---
 
-## 🧩 Componentes
+## 🧩 Componentes utilizados
 
 | | Componente | Função |
 |:---:|---|---|
@@ -87,7 +88,7 @@ Feito no **KiCad** (revisão **R2**). Os pinos do ESP32 mostram os dois nomes: o
 | 👁️ | **TCRT5000** (módulo de 4 pinos) | Borda da arena |
 | 🔋 | 3× **18650** em série (3S, 9 a 12,6 V) | Bateria |
 | ⬇️ | **MP1584** (step-down) | Gera 5 V a partir da bateria |
-| 🔁 | **Level shifter** BSS138 (4 canais) | ECHO e D0 de 5 V → 3,3 V |
+| 🔁 | **Level shifter** BSS138 (4 canais) | Converte ECHO e D0 de 5 V para 3,3 V |
 | 🔘 | Push-button **com trava** (6 pinos) | Liga/desliga da linha de 5 V |
 
 ---
@@ -104,34 +105,39 @@ flowchart LR
     ESP --> V33["3,3 V<br/>shifter LV · ponte H VCC/STBY"]
 ```
 
-- **MP1584 ajustado para 5,0 V com multímetro, sem carga, antes de ligar o resto.**
-- Furos do MP1584 na placa: **1, 2, 5, 6 = GND** · **3 = IN+** (bateria + e VM da ponte H) · **7 = OUT+ 5 V** · 4 e 8 sem uso.
-- **GND em estrela:** o barramento sai do furo 5 para ESP32, sensores e shifter; o GND da ponte H vai num fio grosso separado até o furo 2, junto do negativo da bateria.
-- **Chave:** em série só na linha de 5 V, sem GND. Desligada, o ESP32 apaga; sem 3,3 V, o VCC/STBY da ponte H caem e os motores param (o VM continua ligado na bateria).
+O sistema tem três níveis de tensão:
+
+- **Bateria (9–12,6 V):** alimenta direto a ponte H (VM), que entrega essa tensão aos motores N20 de 12 V.
+- **5 V:** gerados pelo MP1584, regulado para 5,0 V. Alimentam o ESP32, os dois sensores e o lado de 5 V do level shifter.
+- **3,3 V:** vêm do regulador do próprio ESP32 e alimentam a lógica da ponte H (VCC e STBY) e o lado de 3,3 V do level shifter.
+
+A **chave liga/desliga** foi colocada em série na linha de 5 V. Desligada, o ESP32 apaga; sem os 3,3 V, a ponte H é desabilitada e os motores param.
+
+O **GND** foi distribuído em estrela: um barramento para o ESP32, os sensores e o shifter, e um fio mais grosso e separado para o GND da ponte H, que leva a corrente dos motores direto ao negativo da bateria.
 
 ---
 
-## 📍 Ligações do ESP32
+## 📍 Pinagem do ESP32
 
-| ESP32 | Liga em | Observação |
+| ESP32 | Ligado em | Motivo da escolha |
 |---|---|---|
-| `D22/G22` | HC-SR04 **TRIG** | direto (3,3 V basta para o disparo) |
-| `D35/G35` | shifter LV1 ← HV1 ← HC-SR04 **ECHO** | só entrada |
-| `D34/G34` | shifter LV4 ← HV4 ← TCRT5000 **D0** | só entrada · LOW = não é preto |
-| `D13/G13` | TB6612 **PWMA** | motor **direito** (A01/A02) |
+| `D22/G22` | HC-SR04 **TRIG** | Saída livre; 3,3 V já é suficiente para disparar o sensor |
+| `D35/G35` | shifter LV1 ← HV1 ← HC-SR04 **ECHO** | Pino só de entrada, ideal para leitura de sensor |
+| `D34/G34` | shifter LV4 ← HV4 ← TCRT5000 **D0** | Pino só de entrada; LOW = cor diferente de preto |
+| `D13/G13` | TB6612 **PWMA** | Motor **direito** (A01/A02) |
 | `D14/G14` | TB6612 **AIN1** | |
-| `D12/G12` | TB6612 **AIN2** | pino de *strapping*: LOW no boot (a ponte H puxa para baixo) |
-| `D16/G16` | TB6612 **PWMB** | motor **esquerdo** (B01/B02) |
+| `D12/G12` | TB6612 **AIN2** | Pino de *strapping*; a entrada da ponte H o mantém em LOW no boot |
+| `D16/G16` | TB6612 **PWMB** | Motor **esquerdo** (B01/B02); livre no módulo WROOM-32 |
 | `D26/G26` | TB6612 **BIN1** | |
 | `D33/G33` | TB6612 **BIN2** | |
 | `3V3` | shifter LV · TB6612 VCC e STBY | |
 | `5V/V5` | saída da chave (5 V do MP1584) | |
 
-> O **A0** do TCRT5000 fica sem ligação (chega a 5 V). Os canais 2 e 3 do shifter não são usados.
-
 ---
 
-## 🎨 Cores dos fios
+## 🛠️ Montagem
+
+O circuito foi montado em **placa de fenolite**, com os sensores ligados por adaptadores. Os fios foram padronizados por cor:
 
 <table>
 <tr><td valign="top">
@@ -168,13 +174,15 @@ flowchart LR
 </td></tr>
 </table>
 
-> ⚠️ As cores mudam no conector do adaptador: na montagem, guie-se pelo **nome do pino**, não pela cor.
+A sensibilidade do sensor de borda é ajustada no **trimpot** do módulo TCRT5000, de forma que ele indique "preto" na arena e mude de estado em qualquer outra cor.
 
 ---
 
 ## 💻 Firmware
 
-Código final em [`firmware/robo-sumo-idf`](firmware/robo-sumo-idf): **ESP-IDF em C puro**, compilado e gravado com **PlatformIO**. A pinagem fica em [`src/pins.h`](firmware/robo-sumo-idf/src/pins.h). Potência global de **50%** (`FATOR_POTENCIA`).
+O código final está em [`firmware/robo-sumo-idf`](firmware/robo-sumo-idf). Foi escrito em **C puro com ESP-IDF** e compilado e gravado com **PlatformIO**. A pinagem está separada em [`src/pins.h`](firmware/robo-sumo-idf/src/pins.h).
+
+O comportamento é uma **máquina de estados**:
 
 ```mermaid
 stateDiagram-v2
@@ -196,69 +204,48 @@ stateDiagram-v2
 
 | Situação | O que o robô faz |
 |---|---|
+| ⏱️ **Início** | Espera 5 s após ligar; nos últimos 400 ms já lê o ultrassom parado e, se houver alvo à frente, ataca direto |
 | 🔍 **Procurando** | Gira no próprio eixo (~2,5 s, alternando o lado) e dá um passo curto para frente |
 | 🎯 **Alvo a até 50 cm** | Se estava girando, freia (*short brake*) para não passar do alvo, confirma a leitura e **ataca reto** com rampa de partida |
-| 💥 **Encostado no alvo** | Abaixo de 16 cm continua empurrando por até 450 ms mesmo sem eco |
+| 💥 **Encostado no alvo** | Abaixo de 16 cm continua empurrando por até 450 ms, mesmo sem eco |
 | ⛔ **Borda** (3 leituras seguidas fora do preto) | **Freia**, dá **ré** e **gira** de volta para o centro; se ainda estiver na borda, repete a ré |
 
-O HC-SR04 é lido **por interrupção** no pino ECHO, sem travar o loop, com proteção contra ECHO preso em nível alto.
+**Parâmetros finais:**
 
-### ▶️ Como gravar
-
-1. Abra [`firmware/robo-sumo-idf`](firmware/robo-sumo-idf) no VS Code com a extensão **PlatformIO**.
-2. 🔋 **Tire as baterias (ou suspenda as rodas).**
-3. Conecte o ESP32 no USB e use **Upload** → **Monitor** (115200).
-4. A primeira linha mostra `POTENCIA 50%`; depois, a cada 200 ms, o estado, a distância e a borda.
-
-> Ajustes rápidos ficam no topo do `main.c`: `FATOR_POTENCIA`, `DISTANCIA_ATAQUE_CM`, tempos das manobras e `INVERTER_MOTOR_DIR/ESQ` (se uma roda girar ao contrário).
-
----
-
-## 👁️ Calibração do infravermelho
-
-O TCRT5000 compara o reflexo com um limite ajustado no **trimpot**; o código só lê o D0 (preto = HIGH, outra cor = LOW).
-
-1. Monte o sensor na altura final (uns **3 a 8 mm** do chão).
-2. Sem baterias, com o ESP32 no USB, apoie o robô na arena preta.
-3. Gire o trimpot até o **LED de sinal apagar no preto**; volte ao ponto em que ele acende e dê ~1/8 de volta de folga.
-4. Passe sobre a borda/outra cor: o LED deve **acender**.
-
-> 💡 Calibre no local da prova: luz forte interfere no infravermelho.
-
----
-
-## 🧪 Simulação no Wokwi
-
-O Wokwi não tem TB6612, MP1584, level shifter nem TCRT5000, então os sinais da ponte H aparecem em **LEDs** e o infravermelho é uma **chave deslizante** (direita = preto, esquerda = borda). Clique no HC-SR04 durante a simulação para mudar a distância.
-
-| Pasta | Conteúdo |
+| Parâmetro | Valor |
 |---|---|
-| [`simulacao/wokwi-arduino`](simulacao/wokwi-arduino) | Primeira versão do comportamento em Arduino + teste automático |
-| [`simulacao/wokwi-idf-v1`](simulacao/wokwi-idf-v1) | Versão anterior do código ESP-IDF + teste automático |
+| Potência global (`FATOR_POTENCIA`) | 50% |
+| Velocidade de ataque | PWM 127 (rampa a partir de 100) |
+| Velocidade de giro / busca | PWM 85 / 80 |
+| Alcance de detecção do alvo | 50 cm |
+| Filtro da borda | 3 leituras seguidas (30 ms) |
+| Ré na borda | 280 ms (PWM 90 → 110) |
 
-<details>
-<summary><b>Como rodar</b></summary>
-
-- **Navegador:** crie um projeto ESP32 em [wokwi.com](https://wokwi.com) e cole o código e o `diagram.json`.
-- **Wokwi CLI:** compile para `build/` e rode `wokwi-cli --scenario teste.yaml .` com a variável `WOKWI_CLI_TOKEN` definida.
-  - `wokwi-arduino`: copie `sketch.ino` para uma pasta chamada `sketch` e compile com `arduino-cli compile --fqbn esp32:esp32:esp32 --output-dir build`.
-  - `wokwi-idf-v1`: rode `compilar_wokwi.ps1` (compila o código ESP-IDF pelo Arduino CLI só para simular).
-
-</details>
-
-### 🩺 Diagnóstico do ultrassônico
-
-[`ferramentas/diagnostico-hc-sr04`](ferramentas/diagnostico-hc-sr04) mantém os motores desligados e imprime, a cada 200 ms, o nível do ECHO antes do disparo, o tempo até ele subir e a largura do pulso — separa problema de montagem (algo a menos de 3 cm do sensor, cilindros encostados no chassi, TRIG/ECHO trocados) de problema de código.
+O HC-SR04 é lido **por interrupção** no pino ECHO, sem travar o loop principal, com recuperação automática caso o ECHO fique preso em nível alto.
 
 ---
 
-## ⚠️ Segurança
+## 🧠 Decisões de projeto
 
-> [!CAUTION]
-> - Ajuste o MP1584 para **5,0 V antes** de ligar qualquer carga.
-> - Para gravar ou testar pelo USB, **tire as baterias**: a chave só corta o 5 V e, com USB, o 3,3 V mantém a ponte H ativa.
-> - Nunca ligue o **VM** da ponte H no 5 V/3,3 V nem o **VCC** na bateria: 12 V no 3,3 V queima o ESP32.
-> - O **A0** do TCRT5000 não pode ir direto ao ESP32 (5 V).
+- **Level shifter nos sinais de 5 V:** o ECHO do HC-SR04 e o D0 do TCRT5000 saem em 5 V, acima do limite do ESP32 (3,3 V), e por isso passam pelo conversor. O TRIG vai direto, porque 3,3 V já disparam o sensor.
+- **Saída analógica A0 do TCRT5000 não utilizada:** ela chega a 5 V; o projeto usa só a saída digital D0, com o limite ajustado no trimpot.
+- **Pinos 34 e 35 para os sensores:** são pinos só de entrada do ESP32, adequados para leitura.
+- **Ponte H TB6612FNG com freio ativo (*short brake*):** colocar IN1 e IN2 em nível alto trava os motores mais rápido do que só cortar o PWM. Isso é usado tanto para parar na borda quanto para não passar do alvo ao detectá-lo durante o giro.
+- **Chave só na linha de 5 V:** com o ESP32 desligado, a ponte H perde o 3,3 V do VCC/STBY e desabilita os motores, mesmo com a bateria ainda ligada ao VM.
+- **Potência centralizada em um único fator:** todas as velocidades são definidas sobre a escala completa dos motores e multiplicadas por `FATOR_POTENCIA` (50% na versão final), o que permite ajustar a força do robô em um só lugar.
+
+---
+
+## 🧪 Validação e testes
+
+| Etapa | O que foi feito |
+|---|---|
+| ✅ **Esquemático** | Verificação de regras elétricas (ERC) do KiCad sem erros e conferência das ligações pino a pino contra a placa soldada |
+| ✅ **Simulação** | Comportamento simulado no **Wokwi** com testes automáticos: busca, ataque ao alvo e reação à borda ([`simulacao/`](simulacao)) |
+| ✅ **Diagnóstico** | Programa próprio para analisar o sinal do HC-SR04 (motores desligados), usado durante a montagem ([`ferramentas/diagnostico-hc-sr04`](ferramentas/diagnostico-hc-sr04)) |
+| ✅ **Robô real** | Firmware final gravado no ESP32 e testado na arena |
+
+Na simulação, o Wokwi não possui ponte H, conversor, level shifter nem TCRT5000; os sinais dos motores foram representados por LEDs e o sensor de borda por uma chave.
 
 ---
 
@@ -267,11 +254,11 @@ O Wokwi não tem TB6612, MP1584, level shifter nem TCRT5000, então os sinais da
 ```
 Robo-Sumo-10x10/
 ├── Diagrama-Eletrico.pdf          # diagrama elétrico (2 páginas)
-├── docs/                          # imagens do diagrama usadas no README
+├── docs/                          # imagens usadas neste README
 ├── hardware/kicad/                # projeto KiCad R2
 ├── firmware/robo-sumo-idf/        # ⭐ código final (PlatformIO + ESP-IDF)
 ├── simulacao/
-│   ├── wokwi-arduino/             # versão Arduino + teste Wokwi
-│   └── wokwi-idf-v1/              # versão ESP-IDF anterior + teste Wokwi
+│   ├── wokwi-arduino/             # primeira versão do comportamento (Arduino) + teste
+│   └── wokwi-idf-v1/              # versão anterior do firmware ESP-IDF + teste
 └── ferramentas/diagnostico-hc-sr04/
 ```
