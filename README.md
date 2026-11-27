@@ -4,11 +4,11 @@
 
 **Robô autônomo com ESP32 que encontra e derruba uma garrafa sem sair da arena**
 
-![ESP32](https://img.shields.io/badge/ESP32-38_pinos-E7352C?logo=espressif&logoColor=white)
-![ESP-IDF](https://img.shields.io/badge/ESP--IDF-C-blue?logo=espressif&logoColor=white)
-![PlatformIO](https://img.shields.io/badge/PlatformIO-build-F5822A?logo=platformio&logoColor=white)
-![KiCad](https://img.shields.io/badge/KiCad-R2-314CB0?logo=kicad&logoColor=white)
-![Wokwi](https://img.shields.io/badge/Wokwi-simulado-2C9C8B)
+![ESP32](docs/badges/esp32.svg)
+![ESP-IDF](docs/badges/esp-idf.svg)
+![PlatformIO](docs/badges/platformio.svg)
+![KiCad](docs/badges/kicad.svg)
+![Wokwi](docs/badges/wokwi.svg)
 
 Sistemas Embarcados · Universidade do Vale do Paraíba
 
