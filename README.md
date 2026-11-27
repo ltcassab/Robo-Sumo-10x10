@@ -71,7 +71,7 @@ Feito no **KiCad** (revisão **R2**). Os pinos do ESP32 mostram os dois nomes: o
 |:---:|---|---|
 | 🧠 | ESP32 DevKit **38 pinos** (WROOM-32) | Controlador |
 | ⚙️ | Ponte H **TB6612FNG** | Aciona os dois motores |
-| 🛞 | 2× motor **N20 12 V, 300 rpm** | Tração |
+| 🔩 | 2× motor **N20 12 V, 300 rpm** | Tração |
 | 📡 | **HC-SR04** | Distância até o alvo |
 | 👁️ | **TCRT5000** (módulo de 4 pinos) | Borda da arena |
 | 🔋 | 3× **18650** em série (3S, 9 a 12,6 V) | Bateria |
