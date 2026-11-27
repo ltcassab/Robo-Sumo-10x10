@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "author": "Robo 10x10",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-hc-sr04", "id": "hc", "top": -150, "left": -40, "attrs": { "distance": "100" } },
+    { "type": "wokwi-slide-switch", "id": "ir", "top": 30, "left": -130, "attrs": { "value": "1" } },
+    { "type": "wokwi-led", "id": "ledPwmA", "top": 260, "left": -230, "attrs": { "color": "yellow", "label": "PWMA G13" } },
+    { "type": "wokwi-led", "id": "ledAin1", "top": 260, "left": -170, "attrs": { "color": "white", "label": "AIN1 G14" } },
+    { "type": "wokwi-led", "id": "ledAin2", "top": 260, "left": -110, "attrs": { "color": "green", "label": "AIN2 G12" } },
+    { "type": "wokwi-led", "id": "ledPwmB", "top": 260, "left": 160, "attrs": { "color": "orange", "label": "PWMB G16" } },
+    { "type": "wokwi-led", "id": "ledBin1", "top": 260, "left": 220, "attrs": { "color": "purple", "label": "BIN1 G26" } },
+    { "type": "wokwi-led", "id": "ledBin2", "top": 260, "left": 280, "attrs": { "color": "blue", "label": "BIN2 G33" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+
+    [ "hc:VCC", "esp:5V", "red", [] ],
+    [ "hc:GND", "esp:GND.2", "black", [] ],
+    [ "hc:TRIG", "esp:22", "black", [] ],
+    [ "hc:ECHO", "esp:35", "yellow", [] ],
+
+    [ "ir:2", "esp:34", "black", [] ],
+    [ "ir:1", "esp:GND.1", "black", [] ],
+    [ "ir:3", "esp:3V3", "red", [] ],
+
+    [ "ledPwmA:A", "esp:13", "yellow", [] ],
+    [ "ledAin1:A", "esp:14", "white", [] ],
+    [ "ledAin2:A", "esp:12", "green", [] ],
+    [ "ledPwmB:A", "esp:16", "gray", [] ],
+    [ "ledBin1:A", "esp:26", "purple", [] ],
+    [ "ledBin2:A", "esp:33", "blue", [] ],
+
+    [ "ledPwmA:C", "esp:GND.1", "black", [] ],
+    [ "ledAin1:C", "esp:GND.1", "black", [] ],
+    [ "ledAin2:C", "esp:GND.1", "black", [] ],
+    [ "ledPwmB:C", "esp:GND.3", "black", [] ],
+    [ "ledBin1:C", "esp:GND.3", "black", [] ],
+    [ "ledBin2:C", "esp:GND.3", "black", [] ]
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,7 @@
+build/
+.pio/
+.vscode/
+*.kicad_prl
+*-backups/
+fp-info-cache
+*.bak

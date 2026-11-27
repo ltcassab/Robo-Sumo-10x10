@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Robo10x10")(type "KiCad")(uri "${KIPRJMOD}/Robo10x10.kicad_sym")(options "")(descr "Módulos do Robô 10x10"))
+)

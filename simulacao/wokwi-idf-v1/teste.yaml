@@ -1,0 +1,44 @@
+name: Codigo Sumo IDF - busca, ataque e borda
+version: 1
+author: Robo 10x10
+
+steps:
+  - wait-serial: 'COMBATE INICIADO'
+
+  # Busca: avança reto (os dois motores para frente)
+  - wait-serial: 'BUSCA_AVANCAR'
+  - expect-pin: { part-id: esp, name: 14, value: 1 }  # AIN1
+  - expect-pin: { part-id: esp, name: 12, value: 0 }  # AIN2
+  - expect-pin: { part-id: esp, name: 26, value: 1 }  # BIN1
+  - expect-pin: { part-id: esp, name: 33, value: 0 }  # BIN2
+
+  # Busca: gira para a esquerda (esquerdo para trás, direito para frente)
+  - wait-serial: 'BUSCA_GIRAR'
+  - expect-pin: { part-id: esp, name: 14, value: 1 }
+  - expect-pin: { part-id: esp, name: 12, value: 0 }
+  - expect-pin: { part-id: esp, name: 26, value: 0 }
+  - expect-pin: { part-id: esp, name: 33, value: 1 }
+
+  # Alvo a 30 cm durante o giro: freia e ataca reto
+  - set-control: { part-id: hc, name: distance, value: 30 }
+  - wait-serial: 'ATACAR'
+  - expect-pin: { part-id: esp, name: 14, value: 1 }
+  - expect-pin: { part-id: esp, name: 12, value: 0 }
+  - expect-pin: { part-id: esp, name: 26, value: 1 }
+  - expect-pin: { part-id: esp, name: 33, value: 0 }
+
+  # Borda: freia e dá ré nos dois motores
+  - set-control: { part-id: ir, name: value, value: 0 }
+  - wait-serial: 'FUGA_BORDA_RE'
+  - expect-pin: { part-id: esp, name: 14, value: 0 }
+  - expect-pin: { part-id: esp, name: 12, value: 1 }
+  - expect-pin: { part-id: esp, name: 26, value: 0 }
+  - expect-pin: { part-id: esp, name: 33, value: 1 }
+
+  # Volta ao preto, alvo some: gira de volta para o centro e retoma a busca
+  - set-control: { part-id: ir, name: value, value: 1 }
+  - set-control: { part-id: hc, name: distance, value: 100 }
+  - wait-serial: 'FUGA_BORDA_GIRO'
+  - expect-pin: { part-id: esp, name: 26, value: 0 }
+  - expect-pin: { part-id: esp, name: 33, value: 1 }
+  - wait-serial: 'BUSCA_AVANCAR'

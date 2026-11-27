@@ -1,0 +1,52 @@
+name: Robo 10x10 - busca, ataque e borda
+version: 1
+author: Robo 10x10
+
+steps:
+  # Procurando: gira para a direita (esquerdo para frente, direito para tras)
+  - wait-serial: 'Procurando: girando para a direita (10%)'
+  - expect-pin: { part-id: esp, name: 14, value: 0 }  # AIN1
+  - expect-pin: { part-id: esp, name: 12, value: 1 }  # AIN2
+  - expect-pin: { part-id: esp, name: 26, value: 1 }  # BIN1
+  - expect-pin: { part-id: esp, name: 33, value: 0 }  # BIN2
+
+  # Algo a 30 cm: vai para frente
+  - set-control: { part-id: hc, name: distance, value: 30 }
+  - wait-serial: 'ALVO a'
+  - expect-pin: { part-id: esp, name: 14, value: 1 }
+  - expect-pin: { part-id: esp, name: 12, value: 0 }
+  - expect-pin: { part-id: esp, name: 26, value: 1 }
+  - expect-pin: { part-id: esp, name: 33, value: 0 }
+
+  # Objeto saiu (100 cm): volta a procurar
+  - set-control: { part-id: hc, name: distance, value: 100 }
+  - wait-serial: 'Procurando: girando para a direita (10%)'
+
+  # Cor diferente de preto: freia primeiro (os 4 pinos de direcao em HIGH)
+  - set-control: { part-id: ir, name: value, value: 0 }
+  - wait-serial: 'COR DIFERENTE DE PRETO'
+  - expect-pin: { part-id: esp, name: 14, value: 1 }
+  - expect-pin: { part-id: esp, name: 12, value: 1 }
+  - expect-pin: { part-id: esp, name: 26, value: 1 }
+  - expect-pin: { part-id: esp, name: 33, value: 1 }
+
+  # Depois do freio, ré nos dois motores (IN1 em LOW, IN2 em HIGH)
+  - delay: 150ms
+  - expect-pin: { part-id: esp, name: 14, value: 0 }
+  - expect-pin: { part-id: esp, name: 12, value: 1 }
+  - expect-pin: { part-id: esp, name: 26, value: 0 }
+  - expect-pin: { part-id: esp, name: 33, value: 1 }
+
+  # De volta ao preto: termina a ré e volta a procurar
+  - set-control: { part-id: ir, name: value, value: 1 }
+  - wait-serial: 'Procurando: girando para a direita (10%)'
+  - expect-pin: { part-id: esp, name: 14, value: 0 }
+  - expect-pin: { part-id: esp, name: 12, value: 1 }
+  - expect-pin: { part-id: esp, name: 26, value: 1 }
+  - expect-pin: { part-id: esp, name: 33, value: 0 }
+
+  # E ainda ataca um alvo novo depois da borda
+  - set-control: { part-id: hc, name: distance, value: 20 }
+  - wait-serial: 'ALVO a'
+  - expect-pin: { part-id: esp, name: 14, value: 1 }
+  - expect-pin: { part-id: esp, name: 26, value: 1 }
