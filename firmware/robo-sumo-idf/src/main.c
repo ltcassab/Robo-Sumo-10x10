@@ -21,10 +21,6 @@
 #include "esp_log.h"
 #include "pins.h"
 
-#ifndef TCRT
-#define TCRT LDR
-#endif
-
 static const char *TAG = "ROBO_SUMO";
 
 // =========================================================================
@@ -40,26 +36,26 @@ static const char *TAG = "ROBO_SUMO";
 // =========================================================================
 // 2. CONFIGURAÇÕES DE CALIBRAÇÃO (POTÊNCIA 50% | ARENA 65-70 CM)
 // =========================================================================
-// Fator global de potência sobre a escala completa dos motores (0.50f = 50%)
+// Fator global de escala sobre o PWM máximo dos motores (0.50f = 50%)
 #define FATOR_POTENCIA            0.50f
 
 // Padrão TCRT5000 (LM393): 0 = linha branca, 1 = arena preta
 #define NIVEL_BORDA_BRANCA        0
 #define DEBOUNCE_BORDA_AMOSTRAS   3     // 3 leituras consecutivas (30 ms)
 
-// Se alguma roda girar ao contrário no avanço, troque false para true:
+// Inversão de polaridade dos motores por software
 #define INVERTER_MOTOR_DIR        false
 #define INVERTER_MOTOR_ESQ        false
 
-// Alcance do ultrassom (em cm)
-#define DISTANCIA_ATAQUE_CM       50.0f // Alcance para detectar e travar no alvo
-#define DISTANCIA_PONTO_CEGO_CM   16.0f // Mantém empurrão ao encostar no arado
+// Alcance do sensor ultrassônico (em cm)
+#define DISTANCIA_ATAQUE_CM       50.0f // Alcance para detecção e travamento
+#define DISTANCIA_PONTO_CEGO_CM   16.0f // Limiar para ativar inércia de impacto
 
-// Espera regulamentar após ligar a chave (5 segundos)
+// Espera regulamentar após energização (5 segundos)
 #define TEMPO_ESPERA_INICIAL_MS   5000
-#define TEMPO_PRE_SCAN_MS         400   // Últimos 400 ms leem o HC-SR04 parado
+#define TEMPO_PRE_SCAN_MS         400   // Pré-leitura do HC-SR04 com motores parados
 
-// Velocidades PWM (0 a 255) escaladas em 50% da potência máxima
+// Velocidades PWM (0 a 255) escaladas por FATOR_POTENCIA
 #define VEL_ATAQUE_INICIAL        ((int)(200 * FATOR_POTENCIA)) // 100 em 50%
 #define VEL_ATAQUE                ((int)(255 * FATOR_POTENCIA)) // 127 em 50%
 #define VEL_BUSCA                 ((int)(160 * FATOR_POTENCIA)) // 80 em 50%
@@ -68,7 +64,7 @@ static const char *TAG = "ROBO_SUMO";
 #define VEL_RE_INICIAL            ((int)(180 * FATOR_POTENCIA)) // 90 em 50%
 #define VEL_RE_BORDA              ((int)(220 * FATOR_POTENCIA)) // 110 em 50%
 
-// Tempos das manobras e frenagens (em ms - calibrar no tatame)
+// Tempos das manobras, rampas e frenagens (em ms)
 #define TEMPO_RAMPA_ATAQUE_MS     45    // Suaviza o pico de corrente na arrancada
 #define TEMPO_RAMPA_RE_MS         35    // Suaviza o pico de corrente na ré
 #define TEMPO_INERCIA_IMPACTO_MS  450   // Mantém empurrão no contato/ponto cego
@@ -77,8 +73,8 @@ static const char *TAG = "ROBO_SUMO";
 #define TEMPO_FREIO_ALVO_MAX_MS   140   // Teto de espera pela leitura pós-freio
 #define TEMPO_MIN_GIRO_FREIO_MS   70    // Só aplica freio se já ganhou embalo
 #define TEMPO_CORRECAO_ALVO_MS    450   // Contragiro para recentralizar o alvo
-#define TEMPO_GIRO_BUSCA_MS       2500  // ~540° (varre 360° e aponta ao lado oposto)
-#define TEMPO_AVANCO_BUSCA_MS     300   // Passo curto em direção ao lado oposto
+#define TEMPO_GIRO_BUSCA_MS       2500  // Varredura ampla (~540°) no próprio eixo
+#define TEMPO_AVANCO_BUSCA_MS     300   // Passo curto de reposicionamento
 #define TEMPO_FREIO_BORDA_MS      55    // Freio imediato ao detectar a borda
 #define TEMPO_RE_BORDA_MS         280   // Ré curta segura na borda
 #define TEMPO_GIRO_BORDA_MS       560   // Giro de retorno para o interior da arena
