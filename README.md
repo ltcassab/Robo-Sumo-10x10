@@ -27,7 +27,7 @@ Sistemas Embarcados · Universidade do Vale do Paraíba
 - [Alimentação](#-alimentação)
 - [Pinagem do ESP32](#-pinagem-do-esp32)
 - [Montagem](#-montagem)
-- [Firmware](#-firmware)
+- [Firmware](#-firmware) · [Compilação e gravação](#-compilação-e-gravação)
 - [Decisões de projeto](#-decisões-de-projeto)
 - [Validação e testes](#-validação-e-testes)
 - [Estrutura do repositório](#-estrutura-do-repositório)
@@ -193,6 +193,25 @@ O código final está em [`firmware/robo-sumo-idf`](firmware/robo-sumo-idf). Foi
 | Build e gravação | [PlatformIO](https://platformio.org/) · plataforma `espressif32` · placa `esp32dev` · partição própria com 3 MB para a aplicação |
 | Componentes do ESP-IDF usados | `driver/gpio` (sensores, direção dos motores e interrupção do ECHO) · `driver/ledc` (PWM 5 kHz, 8 bits) · `esp_timer` (tempo em µs) · FreeRTOS (loop de 10 ms) · `esp_log` (monitor serial) |
 | Bibliotecas externas | Nenhuma |
+
+### 🔨 Compilação e gravação
+
+O firmware é compilado e gravado com o PlatformIO, a partir da pasta [`firmware/robo-sumo-idf`](firmware/robo-sumo-idf) (pelos botões **Build**, **Upload** e **Monitor** da extensão do VS Code, ou pela linha de comando):
+
+```bash
+cd firmware/robo-sumo-idf
+pio run                                   # compila
+pio run -t upload --upload-port COMx      # grava no ESP32 (porta USB da placa)
+pio device monitor -b 115200              # monitor serial
+```
+
+A gravação é feita com o ESP32 alimentado pelo USB e **sem as baterias**: com o USB conectado, o 3,3 V do ESP32 mantém a ponte H habilitada mesmo com a chave desligada. No monitor serial, a primeira linha confirma a versão gravada (`POTENCIA 50%`) e, a cada 200 ms, aparecem o estado, a distância medida e a leitura da borda:
+
+```
+=== ROBO SUMO ESP-IDF INICIADO (POTENCIA 50%) ===
+Estado: BUSCA_GIRAR      | Dist: 999.0 cm | Borda: NAO | Perto: NAO
+```
+<sub>Exemplo do formato das mensagens (sem o prefixo de log do ESP-IDF).</sub>
 
 O comportamento é uma **máquina de estados**:
 
