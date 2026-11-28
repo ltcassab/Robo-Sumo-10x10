@@ -40,6 +40,8 @@ Robô de 10 cm × 10 cm desenvolvido para uma prova de competição: encontrar e
 
 O projeto passou por todas as etapas de um sistema embarcado: desenho do circuito no KiCad, montagem em placa de fenolite, simulação do comportamento no Wokwi, desenvolvimento do firmware em ESP-IDF e teste no robô real.
 
+> 🏆 **Resultado: 1º lugar na competição de robôs da disciplina.**
+
 | Sensor | Papel no robô |
 |:---:|---|
 | 📡 **HC-SR04** (ultrassom, frente) | Procura o alvo e decide quando atacar |
@@ -51,7 +53,10 @@ O projeto passou por todas as etapas de um sistema embarcado: desenho do circuit
 
 | Vídeo | Duração | Link |
 |---|---|---|
-| 🔧 **Explicação do hardware** | 4 min 23 s | ▶️ [Assistir / baixar (1080×1920)](https://github.com/ltcassab/Robo-Sumo-10x10/releases/download/v1.0/Video-Hardware.mp4) |
+| 🏆 **Demonstração de competitividade — parte 1** | 7 s | ▶️ [Assistir / baixar](https://github.com/ltcassab/Robo-Sumo-10x10/releases/download/v1.0/Video-Competicao-1.mp4) |
+| 🏆 **Demonstração de competitividade — parte 2** | 25 s | ▶️ [Assistir / baixar](https://github.com/ltcassab/Robo-Sumo-10x10/releases/download/v1.0/Video-Competicao-2.mp4) |
+| 🔧 **Explicação do hardware** | 4 min 23 s | ▶️ [Assistir / baixar](https://github.com/ltcassab/Robo-Sumo-10x10/releases/download/v1.0/Video-Hardware.mp4) |
+| 💻 **Explicação do código-fonte** | 9 min 10 s | ▶️ [Assistir / baixar](https://github.com/ltcassab/Robo-Sumo-10x10/releases/download/v1.0/Video-Codigo-Fonte.mp4) |
 
 > Os vídeos estão na [Release v1.0](https://github.com/ltcassab/Robo-Sumo-10x10/releases/tag/v1.0), na qualidade original.
 
@@ -182,6 +187,13 @@ A sensibilidade do sensor de borda é ajustada no **trimpot** do módulo TCRT500
 
 O código final está em [`firmware/robo-sumo-idf`](firmware/robo-sumo-idf). Foi escrito em **C puro com ESP-IDF** e compilado e gravado com **PlatformIO**. A pinagem está separada em [`src/pins.h`](firmware/robo-sumo-idf/src/pins.h).
 
+| Ambiente de desenvolvimento | |
+|---|---|
+| Framework | [ESP-IDF](https://github.com/espressif/esp-idf) 6.1.0 (sem bibliotecas do Arduino) |
+| Build e gravação | [PlatformIO](https://platformio.org/) · plataforma `espressif32` · placa `esp32dev` · partição própria com 3 MB para a aplicação |
+| Componentes do ESP-IDF usados | `driver/gpio` (sensores, direção dos motores e interrupção do ECHO) · `driver/ledc` (PWM 5 kHz, 8 bits) · `esp_timer` (tempo em µs) · FreeRTOS (loop de 10 ms) · `esp_log` (monitor serial) |
+| Bibliotecas externas | Nenhuma |
+
 O comportamento é uma **máquina de estados**:
 
 ```mermaid
@@ -243,7 +255,7 @@ O HC-SR04 é lido **por interrupção** no pino ECHO, sem travar o loop principa
 | ✅ **Esquemático** | Verificação de regras elétricas (ERC) do KiCad sem erros e conferência das ligações pino a pino contra a placa soldada |
 | ✅ **Simulação** | Comportamento simulado no **Wokwi** com testes automáticos: busca, ataque ao alvo e reação à borda ([`simulacao/`](simulacao)) |
 | ✅ **Diagnóstico** | Programa próprio para analisar o sinal do HC-SR04 (motores desligados), usado durante a montagem ([`ferramentas/diagnostico-hc-sr04`](ferramentas/diagnostico-hc-sr04)) |
-| ✅ **Robô real** | Firmware final gravado no ESP32 e testado na arena |
+| ✅ **Robô real** | Firmware final gravado no ESP32, testado na arena e campeão da competição (1º lugar) |
 
 Na simulação, o Wokwi não possui ponte H, conversor, level shifter nem TCRT5000; os sinais dos motores foram representados por LEDs e o sensor de borda por uma chave.
 
